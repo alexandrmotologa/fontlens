@@ -418,9 +418,9 @@ body { font-family: var(--font-primary); }
       </div>
 
       {/* Visual Playground / Layout Shift Simulation */}
-      <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 relative overflow-hidden">
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-          <div className="flex items-center gap-3">
+      <div className="p-4 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <h3 className="font-bold text-white text-sm">Visual Layout Shift Inspector</h3>
             <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
               Font: {family} vs {fallbackData.name}
@@ -431,7 +431,7 @@ body { font-family: var(--font-primary); }
             <button
               onClick={runSimulatedSwap}
               disabled={isSimulatingSwap}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition-colors disabled:opacity-50"
             >
               <Play className="w-3 h-3" />
               <span>{isSimulatingSwap ? 'Simulating Swap...' : 'Simulate Font Load (FOUT)'}</span>
@@ -481,17 +481,17 @@ body { font-family: var(--font-primary); }
 
         {/* Preview Container */}
         {viewMode === 'overlay' && (
-          <div className="relative min-h-[220px] p-6 rounded-xl bg-slate-950 border border-slate-800 flex flex-col justify-center">
+          <div className="relative min-h-[180px] sm:min-h-[220px] p-4 sm:p-6 rounded-xl bg-slate-950 border border-slate-800 flex flex-col justify-center">
             {/* Fallback Font Layer */}
             <div
-              className="text-amber-400/70 select-none pointer-events-none"
+              className="text-amber-400/70 select-none pointer-events-none break-words"
               style={{
                 fontFamily: isSimulatingSwap
                   ? (simulatedFontFamily === 'fallback'
                       ? (useOverrides ? `'${fallbackAlias}'` : `'${fallbackData.name}'`)
                       : `'${family}', sans-serif`)
                   : (useOverrides ? `'${fallbackAlias}'` : `'${fallbackData.name}'`),
-                fontSize: '28px',
+                fontSize: 'clamp(18px, 3.2vw, 28px)',
                 lineHeight: '1.4',
                 position: 'relative',
                 zIndex: 1,
@@ -503,10 +503,10 @@ body { font-family: var(--font-primary); }
             {/* Web Font Layer (when not in simulation mode) */}
             {!isSimulatingSwap && (
               <div
-                className="text-cyan-300 absolute inset-0 p-6 flex flex-col justify-center pointer-events-none"
+                className="text-cyan-300 absolute inset-0 p-4 sm:p-6 flex flex-col justify-center pointer-events-none break-words"
                 style={{
                   fontFamily: `'${family}', sans-serif`,
-                  fontSize: '28px',
+                  fontSize: 'clamp(18px, 3.2vw, 28px)',
                   lineHeight: '1.4',
                   mixBlendMode: 'screen',
                   opacity: 0.85,
@@ -520,13 +520,13 @@ body { font-family: var(--font-primary); }
         )}
 
         {viewMode === 'split' && (
-          <div className="relative min-h-[220px] rounded-xl bg-slate-950 border border-slate-800 overflow-hidden select-none">
+          <div className="relative min-h-[180px] sm:min-h-[220px] rounded-xl bg-slate-950 border border-slate-800 overflow-hidden select-none">
             {/* Left side: Web Font */}
             <div
-              className="absolute inset-0 p-6 flex flex-col justify-center text-cyan-300 bg-slate-950"
+              className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-center text-cyan-300 bg-slate-950 break-words"
               style={{
                 fontFamily: `'${family}', sans-serif`,
-                fontSize: '28px',
+                fontSize: 'clamp(18px, 3.2vw, 28px)',
                 lineHeight: '1.4',
                 clipPath: `inset(0 ${100 - splitPos}% 0 0)`,
               }}
@@ -536,10 +536,10 @@ body { font-family: var(--font-primary); }
 
             {/* Right side: Fallback Font */}
             <div
-              className="absolute inset-0 p-6 flex flex-col justify-center text-amber-400 bg-slate-900"
+              className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-center text-amber-400 bg-slate-900 break-words"
               style={{
                 fontFamily: useOverrides ? `'${fallbackAlias}'` : `'${fallbackData.name}'`,
-                fontSize: '28px',
+                fontSize: 'clamp(18px, 3.2vw, 28px)',
                 lineHeight: '1.4',
                 clipPath: `inset(0 0 0 ${splitPos}%)`,
               }}
@@ -599,9 +599,9 @@ body { font-family: var(--font-primary); }
 
       {/* Code Snippets & Framework Exporters */}
       <div className="rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between px-4 py-2.5 bg-slate-950 border-b border-slate-800 gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-3 sm:px-4 py-2.5 bg-slate-950 border-b border-slate-800 gap-2">
           {/* Format Tabs */}
-          <div className="flex items-center gap-1 overflow-x-auto text-xs">
+          <div className="flex items-center gap-1 overflow-x-auto text-xs min-w-0 pb-1 sm:pb-0 w-full sm:w-auto scrollbar-none">
             <button
               onClick={() => setCodeTab('css')}
               className={`px-3 py-1 rounded transition-colors font-medium ${

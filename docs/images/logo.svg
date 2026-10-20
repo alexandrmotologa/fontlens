@@ -1,0 +1,236 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <clipPath id="squircle-clip">
+      <rect x="24" y="24" width="976" height="976" rx="220" />
+    </clipPath>
+
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="eye-glow-left" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="eye-glow-right" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="beak-cyan" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="40%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <filter id="subtle-shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="22" flood-color="#000000" flood-opacity="0.16" />
+    </filter>
+  </defs>
+
+  <!-- Luxury White Squircle Container -->
+  <rect x="24" y="24" width="976" height="976" rx="220" fill="#ffffff" stroke="#e2e8f0" stroke-width="6" />
+
+  <g clip-path="url(#squircle-clip)">
+    <g transform="translate(512, 512)" filter="url(#subtle-shadow)">
+
+      <!-- Massive Hexagonal Architectural Gateway Frame -->
+      <polygon points="
+        0,-395
+        342,-197
+        342,197
+        0,395
+        -342,197
+        -342,-197
+      " fill="none" stroke="#0f172a" stroke-width="40" stroke-linejoin="round" />
+
+      <!-- Inner Precision Accent: Dashed Cyan Gateway -->
+      <polygon points="
+        0,-360
+        312,-180
+        312,180
+        0,360
+        -312,180
+        -312,-180
+      " fill="none" stroke="#00f5ff" stroke-width="4" opacity="0.4" stroke-dasharray="16, 12" />
+
+      <!-- Precision Optical Calibration Reticles -->
+      <line x1="0" y1="-380" x2="0" y2="-340" stroke="#00f5ff" stroke-width="3" opacity="0.7" />
+      <line x1="0" y1="340" x2="0" y2="380" stroke="#00f5ff" stroke-width="3" opacity="0.7" />
+      <line x1="-330" y1="0" x2="-290" y2="0" stroke="#00f5ff" stroke-width="3" opacity="0.7" />
+      <line x1="290" y1="0" x2="330" y2="0" stroke="#00f5ff" stroke-width="3" opacity="0.7" />
+
+      <!-- 100% Watertight Solid Base Silhouette (Prevents white backdrop vertex leaks) -->
+      <path d="M 0,-285 L 50,-270 L 95,-240 L 75,-190 L 160,-140 L 250,-65 L 260,10 L 230,85 L 240,95 L 195,175 L 200,185 L 150,255 L 125,260 L 70,295 L 40,345 L 0,360 L -40,345 L -70,295 L -125,260 L -150,255 L -200,185 L -195,175 L -240,95 L -230,85 L -260,10 L -250,-65 L -160,-140 L -75,-190 L -95,-240 L -50,-270 Z" fill="#06080e" />
+
+      <!-- ==================== ORIGAMI LOW-POLY MESH ==================== -->
+
+      <!-- Section A: Proud Raptor Crown & Crest -->
+      <!-- Center Crown Apex -->
+      <polygon points="0,-285 -50,-270 0,-235" fill="#475569" />
+      <polygon points="0,-285 50,-270 0,-235" fill="#334155" />
+
+      <!-- Lateral Crown Wings -->
+      <polygon points="-50,-270 -95,-240 -45,-200 0,-235" fill="#64748b" />
+      <polygon points="-95,-240 -75,-190 -45,-200" fill="#334155" />
+
+      <polygon points="50,-270 95,-240 45,-200 0,-235" fill="#1e293b" />
+      <polygon points="95,-240 75,-190 45,-200" fill="#0f172a" />
+
+      <!-- Forehead Keel & Optical Prism Diamond -->
+      <polygon points="0,-235 -45,-200 0,-160" fill="#94a3b8" />
+      <polygon points="0,-235 45,-200 0,-160" fill="#1e293b" />
+
+      <!-- Precision Metric Sensor (Cyan Prism) -->
+      <polygon points="0,-205 -14,-185 0,-160 14,-185" fill="#00f5ff" opacity="0.95" />
+      <polygon points="0,-205 14,-185 0,-160" fill="#0284c7" opacity="0.9" />
+
+      <!-- Section B: Intense Predator Brow & Almond Optical Eyes -->
+      <!-- Left Brow Ridge -->
+      <polygon points="0,-160 -45,-200 -95,-165 -55,-135" fill="#cbd5e1" />
+      <polygon points="0,-160 -55,-135 -24,-125 0,-130" fill="#94a3b8" />
+
+      <!-- Right Brow Ridge -->
+      <polygon points="0,-160 45,-200 95,-165 55,-135" fill="#1e293b" />
+      <polygon points="0,-160 55,-135 24,-125 0,-130" fill="#0f172a" />
+
+      <!-- Left Eye Socket & Almond Optic -->
+      <polygon points="-24,-125 -55,-135 -92,-120 -48,-110" fill="#06080e" />
+      <polygon points="-28,-123 -54,-132 -86,-120 -48,-113" fill="url(#eye-glow-left)" />
+      <!-- Left Pupil & Specular Spec -->
+      <polygon points="-46,-127 -60,-122 -49,-116" fill="#0f172a" />
+      <polygon points="-42,-126 -46,-123 -40,-121" fill="#ffffff" />
+
+      <!-- Right Eye Socket & Almond Optic -->
+      <polygon points="24,-125 55,-135 92,-120 48,-110" fill="#06080e" />
+      <polygon points="28,-123 54,-132 86,-120 48,-113" fill="url(#eye-glow-right)" />
+      <!-- Right Pupil & Specular Spec -->
+      <polygon points="46,-127 60,-122 49,-116" fill="#0f172a" />
+      <polygon points="42,-126 46,-123 40,-121" fill="#ffffff" />
+
+      <!-- Section C: Hooked Raptor Beak (Anatomical Curvature) -->
+      <!-- Culmen Base -->
+      <polygon points="0,-130 -24,-125 -18,-75 0,-80" fill="#94a3b8" />
+      <polygon points="0,-130 24,-125 18,-75 0,-80" fill="#475569" />
+
+      <!-- Mid Beak Body -->
+      <polygon points="0,-80 -18,-75 0,-20" fill="#64748b" />
+      <polygon points="0,-80 18,-75 0,-20" fill="#334155" />
+
+      <!-- Hooked Downward Hook Tip (Electric Cyan Precision Apex) -->
+      <polygon points="0,-20 -18,-35 -6,38 0,44" fill="url(#beak-cyan)" />
+      <polygon points="0,-20 18,-35 6,38 0,44" fill="#0284c7" />
+
+      <!-- Under-beak Tomium -->
+      <polygon points="0,44 -6,38 0,18 6,38" fill="#06080e" />
+      <polygon points="0,18 -18,-35 -30,-45 0,-40" fill="#0f172a" />
+      <polygon points="0,18 18,-35 30,-45 0,-40" fill="#0a0e17" />
+
+      <!-- Section D: Cheeks, Malar Tear Mask & Gorget -->
+      <!-- Left Malar Stripe -->
+      <polygon points="-48,-110 -92,-120 -75,-190 -120,-130" fill="#0a0e17" />
+      <polygon points="-48,-110 -120,-130 -95,-60 -40,-75" fill="#06080e" />
+      <!-- Left Cheek Plumage Contrast (Titanium Silver) -->
+      <polygon points="-120,-130 -160,-140 -140,-60 -95,-60" fill="#94a3b8" />
+      <polygon points="-95,-60 -140,-60 -110,10 -45,-5" fill="#475569" />
+
+      <!-- Right Malar Stripe (Mirror) -->
+      <polygon points="48,-110 92,-120 75,-190 120,-130" fill="#06080e" />
+      <polygon points="48,-110 120,-130 95,-60 40,-75" fill="#06080e" />
+      <!-- Right Cheek Plumage Contrast -->
+      <polygon points="120,-130 160,-140 140,-60 95,-60" fill="#334155" />
+      <polygon points="95,-60 140,-60 110,10 45,-5" fill="#1e293b" />
+
+      <!-- Throat & Gorget -->
+      <polygon points="0,18 -28,-40 -40,-75 -45,-5 0,55" fill="#334155" />
+      <polygon points="0,18 28,-40 40,-75 45,-5 0,55" fill="#0f172a" />
+      <polygon points="0,18 -30,-5 0,55" fill="#64748b" />
+      <polygon points="0,18 30,-5 0,55" fill="#1e293b" />
+
+      <!-- Section E: Massive Broad Shoulders (Widest point of the falcon) -->
+      <!-- Left Shoulder Cape -->
+      <polygon points="-160,-140 -250,-65 -190,-40 -140,-60" fill="#475569" />
+      <polygon points="-250,-65 -260,10 -200,25 -190,-40" fill="#64748b" />
+      <polygon points="-190,-40 -200,25 -150,50 -110,10" fill="#94a3b8" />
+
+      <!-- Right Shoulder Cape (Mirror Shadow) -->
+      <polygon points="160,-140 250,-65 190,-40 140,-60" fill="#0f172a" />
+      <polygon points="250,-65 260,10 200,25 190,-40" fill="#1e293b" />
+      <polygon points="190,-40 200,25 150,50 110,10" fill="#334155" />
+
+      <!-- Section F: Folded Primary Wings (Tapering inward sharply) -->
+      <!-- Left Wing - Tier 1 -->
+      <polygon points="-260,10 -230,85 -180,70 -200,25" fill="#1e293b" />
+      <polygon points="-200,25 -180,70 -130,90 -150,50" fill="#475569" />
+
+      <!-- Left Wing - Tier 2 (Stepped notch at -240, 95) -->
+      <polygon points="-230,85 -240,95 -195,175 -155,150 -180,70" fill="#0f172a" />
+      <polygon points="-180,70 -155,150 -105,160 -130,90" fill="#334155" />
+
+      <!-- Left Wing - Tier 3 (Primary Flight Wingtip) -->
+      <polygon points="-195,175 -200,185 -150,255 -115,225 -155,150" fill="#0a0e17" />
+      <polygon points="-155,150 -115,225 -80,220 -105,160" fill="#1e293b" />
+      <polygon points="-150,255 -125,260 -70,295 -95,245 -115,225" fill="#06080e" />
+
+      <!-- Right Wing - Tier 1 (Mirror Deep Shadow) -->
+      <polygon points="260,10 230,85 180,70 200,25" fill="#0f172a" />
+      <polygon points="200,25 180,70 130,90 150,50" fill="#1e293b" />
+
+      <!-- Right Wing - Tier 2 -->
+      <polygon points="230,85 240,95 195,175 155,150 180,70" fill="#0a0e17" />
+      <polygon points="180,70 155,150 105,160 130,90" fill="#0f172a" />
+
+      <!-- Right Wing - Tier 3 (Primary Flight Wingtip) -->
+      <polygon points="195,175 200,185 150,255 115,225 155,150" fill="#06080e" />
+      <polygon points="155,150 115,225 80,220 105,160" fill="#0a0e17" />
+      <polygon points="150,255 125,260 70,295 95,245 115,225" fill="#06080e" />
+
+      <!-- Section G: Athletic Tapered Chest & Keel -->
+      <!-- Central Pectoral Keel -->
+      <polygon points="0,55 -65,90 0,155" fill="#64748b" />
+      <polygon points="0,55 65,90 0,155" fill="#1e293b" />
+      <polygon points="0,55 -30,105 0,155" fill="#94a3b8" />
+      <polygon points="0,55 30,105 0,155" fill="#334155" />
+
+      <!-- Flanking Pectoral Plates -->
+      <polygon points="0,55 -45,-5 -110,10 -65,90" fill="#475569" />
+      <polygon points="0,55 45,-5 110,10 65,90" fill="#0f172a" />
+
+      <polygon points="-65,90 -110,10 -150,50 -130,90 -95,115" fill="#334155" />
+      <polygon points="65,90 110,10 150,50 130,90 95,115" fill="#0f172a" />
+
+      <!-- Lower Torso & Abdominal Taper -->
+      <polygon points="0,155 -65,90 -95,115 -50,180 0,205" fill="#1e293b" />
+      <polygon points="0,155 65,90 95,115 50,180 0,205" fill="#0f172a" />
+      <polygon points="0,155 -25,175 0,205" fill="#475569" />
+      <polygon points="0,155 25,175 0,205" fill="#1e293b" />
+
+      <polygon points="-95,115 -130,90 -105,160 -50,180" fill="#0f172a" />
+      <polygon points="95,115 130,90 105,160 50,180" fill="#0a0e17" />
+
+      <!-- Section H: Tail Wedge & Aerodynamic Keel -->
+      <!-- Center Tail Keel -->
+      <polygon points="0,205 -50,180 -80,220 -35,285 0,310" fill="#1e293b" />
+      <polygon points="0,205 50,180 80,220 35,285 0,310" fill="#0f172a" />
+      <polygon points="0,205 -20,255 0,310" fill="#334155" />
+      <polygon points="0,205 20,255 0,310" fill="#1e293b" />
+
+      <!-- Lower Tail Feathers Point -->
+      <polygon points="0,310 -35,285 -40,345 0,360" fill="#1e293b" />
+      <polygon points="0,310 35,285 40,345 0,360" fill="#0f172a" />
+      <polygon points="-35,285 -70,295 -40,345" fill="#0a0e17" />
+      <polygon points="35,285 70,295 40,345" fill="#06080e" />
+
+      <!-- Section I: Technical Zero-CLS Metric Overrides Horizon Laser -->
+      <line x1="-190" y1="20" x2="-80" y2="20" stroke="#00f5ff" stroke-width="2.5" opacity="0.65" stroke-dasharray="8, 6" />
+      <line x1="80" y1="20" x2="190" y2="20" stroke="#00f5ff" stroke-width="2.5" opacity="0.65" stroke-dasharray="8, 6" />
+      <circle cx="-190" cy="20" r="3.5" fill="#00f5ff" opacity="0.9" />
+      <circle cx="190" cy="20" r="3.5" fill="#00f5ff" opacity="0.9" />
+
+    </g>
+  </g>
+</svg>

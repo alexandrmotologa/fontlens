@@ -126,22 +126,23 @@ export default function Navbar({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex space-x-1 border-t border-slate-800/80 pt-1 -mb-px overflow-x-auto">
+        <div className="flex space-x-1 border-t border-slate-800/80 pt-1 -mb-px overflow-x-auto no-scrollbar scroll-smooth">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                data-tab={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 text-xs font-medium border-b-2 transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs font-medium border-b-2 transition-all shrink-0 whitespace-nowrap ${
                   isActive
                     ? 'border-cyan-400 text-cyan-400 bg-cyan-950/20'
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                {tab.label}
+                <Icon className="w-4 h-4 shrink-0" />
+                <span>{tab.label}</span>
               </button>
             );
           })}

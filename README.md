@@ -1,6 +1,19 @@
-# FontLens
+<p align="center">
+  <img src="docs/images/logo.png?raw=true" alt="FontLens Logo" width="130" style="border-radius: 24px;" />
+</p>
 
-Web font bloat optimizer, glyph subset synthesizer, and zero-CLS metric overrides generator.
+<h1 align="center">FontLens</h1>
+
+<p align="center">
+  Web font bloat optimizer, glyph subset synthesizer, and zero-CLS metric overrides generator.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12-3776ab?logo=python&logoColor=white" alt="Python 3.12" />
+  <img src="https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" />
+  <img src="https://img.shields.io/badge/Zero--CLS-0.00-10b981" alt="Zero-CLS" />
+</p>
 
 <p align="center">
   <img src="docs/images/fontlens_demo.gif" alt="FontLens Interactive Studio Demo" width="100%" />

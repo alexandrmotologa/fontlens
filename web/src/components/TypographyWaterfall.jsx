@@ -20,7 +20,7 @@ export default function TypographyWaterfall({ fontFamilyName, fallbackAlias }) {
   return (
     <div className="space-y-6">
       {/* Controls Bar */}
-      <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+      <div className="p-4 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-800">
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -32,10 +32,10 @@ export default function TypographyWaterfall({ fontFamilyName, fallbackAlias }) {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+          <div className="flex items-center gap-1 sm:gap-2 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs overflow-x-auto max-w-full">
             <button
               onClick={() => setActiveFontChoice('web')}
-              className={`px-3 py-1 rounded-md transition-colors ${
+              className={`px-2.5 sm:px-3 py-1 rounded-md transition-colors whitespace-nowrap ${
                 activeFontChoice === 'web' ? 'bg-cyan-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -43,7 +43,7 @@ export default function TypographyWaterfall({ fontFamilyName, fallbackAlias }) {
             </button>
             <button
               onClick={() => setActiveFontChoice('fallback')}
-              className={`px-3 py-1 rounded-md transition-colors ${
+              className={`px-2.5 sm:px-3 py-1 rounded-md transition-colors whitespace-nowrap ${
                 activeFontChoice === 'fallback' ? 'bg-cyan-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -51,7 +51,7 @@ export default function TypographyWaterfall({ fontFamilyName, fallbackAlias }) {
             </button>
             <button
               onClick={() => setActiveFontChoice('overlay')}
-              className={`px-3 py-1 rounded-md transition-colors ${
+              className={`px-2.5 sm:px-3 py-1 rounded-md transition-colors whitespace-nowrap ${
                 activeFontChoice === 'overlay' ? 'bg-cyan-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -111,18 +111,18 @@ export default function TypographyWaterfall({ fontFamilyName, fallbackAlias }) {
       </div>
 
       {/* Waterfall Rows */}
-      <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 divide-y divide-slate-800/80">
+      <div className="p-4 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 divide-y divide-slate-800/80">
         {SIZES.map((size) => (
-          <div key={size} className="py-4 first:pt-0 last:pb-0 flex flex-col md:flex-row items-baseline gap-4">
+          <div key={size} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row items-baseline gap-2 sm:gap-4">
             <span className="w-16 shrink-0 text-xs font-mono font-bold text-slate-500">
               {size}px
             </span>
 
-            <div className="flex-1 relative overflow-hidden">
+            <div className="flex-1 relative overflow-hidden min-w-0 w-full">
               {activeFontChoice === 'overlay' ? (
                 <div className="relative">
                   <div
-                    className="text-amber-400/60 select-none"
+                    className="text-amber-400/60 select-none break-words"
                     style={{
                       fontFamily: `'${fbAlias}', sans-serif`,
                       fontSize: `${size}px`,
@@ -133,7 +133,7 @@ export default function TypographyWaterfall({ fontFamilyName, fallbackAlias }) {
                     {customText}
                   </div>
                   <div
-                    className="text-cyan-300 absolute inset-0 select-none pointer-events-none"
+                    className="text-cyan-300 absolute inset-0 select-none pointer-events-none break-words"
                     style={{
                       fontFamily: `'${family}', sans-serif`,
                       fontSize: `${size}px`,
@@ -147,7 +147,7 @@ export default function TypographyWaterfall({ fontFamilyName, fallbackAlias }) {
                 </div>
               ) : (
                 <div
-                  className="text-slate-100"
+                  className="text-slate-100 break-words"
                   style={{
                     fontFamily: getFontFamily(activeFontChoice),
                     fontSize: `${size}px`,
