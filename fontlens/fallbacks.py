@@ -293,6 +293,18 @@ class FallbackRegistry:
 
         return min(candidates, key=score)
 
+    def match_platform_fallbacks(
+        self,
+        web_font_category: str,
+        web_font_avg_width_ratio: float,
+    ) -> Dict[str, FallbackFont]:
+        """Find the optimal fallback font for Windows, macOS/iOS, and Android."""
+        return {
+            "windows": self.match_best_fallback(web_font_category, web_font_avg_width_ratio, target_os="windows"),
+            "macos": self.match_best_fallback(web_font_category, web_font_avg_width_ratio, target_os="macos"),
+            "android": self.match_best_fallback(web_font_category, web_font_avg_width_ratio, target_os="android"),
+        }
+
 
 _GLOBAL_REGISTRY: Optional[FallbackRegistry] = None
 

@@ -1,0 +1,15 @@
+/* Poppins (Basic Latin & Punctuation) */
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-latin.woff2') format('woff2');
+  font-display: swap;
+  unicode-range: U+0020, U+00A0;
+}
+
+/* Poppins (Currency, Arrows & Mathematics) */
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-symbols.woff2') format('woff2');
+  font-display: swap;
+  unicode-range: U+20A8, U+20B9, U+25CC;
+}

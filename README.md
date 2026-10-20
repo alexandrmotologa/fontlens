@@ -20,17 +20,23 @@ FontLens eliminates both issues by extracting exact codebase glyphs, synthesizin
 
 - **Codebase Glyph Harvest**: Scans HTML, JSX, TSX, Vue, Svelte, Astro, Markdown, and JSON files to extract the exact list of unique characters used in a project. Produces optimized CSS `unicode-range` strings.
 - **WOFF2 Subset Synthesizer**: Uses `fontTools` and Brotli compression to strip unneeded glyphs, unreferenced kerning pairs, and legacy OpenType tables (`gasp`, `VDMX`, `LTSH`, `hdmx`, `DSIG`). Shrinks font payloads from 300+ KB down to 10-15 KB.
-- **Zero-CLS Metric Overrides**: Reads font coordinate metrics from `OS/2`, `hhea`, and `head` tables. Computes exact mathematical ratios for `size-adjust`, `ascent-override`, `descent-override`, and `line-gap-override` against system fonts (`Arial`, `Roboto`, `Georgia`, `Segoe UI`, `system-ui`).
-- **Variable Font Slicing**: Inspects `fvar` design axes (`wght`, `opsz`, `wdth`, `slnt`) and allows clamping ranges (for example, pinning weight to 400-700) to strip variation deltas outside target design bounds.
-- **Visual Studio**: Web application with real-time layout shift comparison, FOUT simulation, glyph matrices, and vector outline rendering.
+- **Zero-CLS Multi-Platform Overrides**: Computes mathematical `@font-face` overrides for Apple (`-apple-system` / `Helvetica`), Windows (`Segoe UI` / `Arial`), and Android (`Roboto`), producing a unified font stack that eliminates layout shifts across all devices simultaneously.
+- **Google Fonts Direct Ingestion**: Search and download any Google Font by family name directly from the CLI or Web UI, subsetting and computing metric overrides in a single step.
+- **Progressive Unicode-Range Chunking**: Splits large font files into disjoint WOFF2 bundles (`latin`, `latin-ext`, `symbols`) paired with standard CSS `unicode-range` rules, enabling on-demand progressive font downloads.
+- **Framework Code Exporters**: Generates production-ready configurations for Next.js 14/15 (`next/font/local`), Tailwind CSS v4 (`@theme`), Tailwind CSS v3, and critical inlined HTML.
+- **Typography Waterfall & Visual Studio**: Web application with live layout shift comparison, FOUT swap simulation, 12px to 64px typography scale inspection, variable font axis sliders, and vector outline rendering.
 
 ---
 
 ## Interactive Studio Screenshots
 
-| Zero-CLS Studio (Live A/B Diff) | WOFF2 Subsetter & Matrix |
+| Zero-CLS Studio (Live A/B Diff) | Typography Waterfall & Scale |
 | :---: | :---: |
-| ![Zero-CLS Studio](docs/images/fontlens-1.png) | ![WOFF2 Subsetter](docs/images/fontlens-2.png) |
+| ![Zero-CLS Studio](docs/images/fontlens-1.png) | ![Typography Waterfall](docs/images/fontlens-6.png) |
+
+| WOFF2 Subsetter & Matrix | Progressive Font Chunking |
+| :---: | :---: |
+| ![WOFF2 Subsetter](docs/images/fontlens-2.png) | ![Font Chunking](docs/images/fontlens-7.png) |
 
 | Codebase Glyph Harvest | Variable Axes Studio |
 | :---: | :---: |
@@ -87,18 +93,32 @@ pip install -e .
 fontlens harvest ./src ./public -o used-glyphs.txt
 ```
 
-#### 2. Synthesize WOFF2 Subset
+#### 2. Download from Google Fonts and Subset
+
+```bash
+# Fetch font and immediately subset using codebase characters
+fontlens fetch Poppins -w 400 --scan ./src/ -o dist/fonts/Poppins.woff2
+```
+
+#### 3. Synthesize WOFF2 Subset
 
 ```bash
 # Subset a font using scanned project characters
 fontlens subset Inter-Variable.ttf --scan ./src/ -o dist/fonts/Inter.subset.woff2 --no-hinting
 ```
 
-#### 3. Compute Zero-CLS Overrides
+#### 4. Split Font into Progressive Unicode-Range Chunks
 
 ```bash
-# Generate overrides against Arial
-fontlens metrics Roboto.ttf --fallback Arial
+# Split into Latin, Latin-Extended, and Symbols WOFF2 chunks
+fontlens split Roboto.ttf -o dist/fonts/
+```
+
+#### 5. Compute Multi-Platform Zero-CLS Overrides
+
+```bash
+# Generate unified multi-platform overrides (Apple, Windows, Android)
+fontlens multiplatform Roboto.ttf
 ```
 
 Output:

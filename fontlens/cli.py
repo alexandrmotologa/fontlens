@@ -22,9 +22,15 @@ from rich.table import Table
 from fontlens import __version__
 from fontlens.analyzer import FontAnalyzer
 from fontlens.fallbacks import get_fallback_registry
+from fontlens.google_fonts import fetch_google_font, get_popular_google_fonts
 from fontlens.harvester import CodebaseHarvester
-from fontlens.metrics import calculate_metric_overrides, extract_font_metrics
+from fontlens.metrics import (
+    calculate_metric_overrides,
+    calculate_multiplatform_overrides,
+    extract_font_metrics,
+)
 from fontlens.subsetter import FontSubsetter, SubsetConfig
+from fontlens.splitter import split_font
 
 
 console = Console()
@@ -272,6 +278,100 @@ def cmd_studio(args: argparse.Namespace) -> None:
     run_server(host=args.host, port=args.port)
 
 
+def cmd_fetch(args: argparse.Namespace) -> None:
+    """Fetch font from Google Fonts."""
+    print_banner()
+    with console.status(f"[bold green]Fetching '{args.family}' (weight: {args.weight}) from Google Fonts..."):
+        try:
+            font_bytes, filename = fetch_google_font(
+                family_name=args.family,
+                weight=args.weight,
+                italic=args.italic,
+            )
+        except Exception as e:
+            console.print(f"[bold red]Fetch Error:[/bold red] {e}")
+            sys.exit(1)
+
+    out_path = Path(args.output or filename)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_bytes(font_bytes)
+    console.print(f"[bold green]✓ Downloaded {args.family} ({len(font_bytes) / 1024:.1f} KB) to {out_path}[/bold green]")
+
+    if args.scan:
+        console.print(f"[dim]Scanning codebase in {args.scan} to subset immediately...[/dim]")
+        harvest = CodebaseHarvester().harvest_files([args.scan])
+        subsetter = FontSubsetter(font_bytes)
+        res = subsetter.subset(SubsetConfig(text=harvest.unique_glyphs, strip_hinting=True))
+        sub_path = out_path.with_name(f"{out_path.stem}.subset.woff2")
+        sub_path.write_bytes(res.output_bytes)
+        console.print(f"[bold cyan]✓ Synthesized subset:[/bold cyan] {sub_path} ({res.subset_size_bytes / 1024:.1f} KB, -{res.compression_percent:.1f}%)")
+
+
+def cmd_split(args: argparse.Namespace) -> None:
+    """Split font into progressive unicode-range chunks."""
+    font_path = Path(args.font)
+    if not font_path.exists():
+        console.print(f"[bold red]Error:[/bold red] Font file not found: {font_path}")
+        sys.exit(1)
+
+    print_banner()
+    with console.status("[bold green]Splitting font into progressive unicode-range chunks..."):
+        res = split_font(str(font_path), strip_hinting=not args.keep_hinting)
+
+    out_dir = Path(args.output or "./dist/fonts")
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    table = Table(title=f"Progressive Font Chunks for {res.family_name}", border_style="cyan")
+    table.add_column("Chunk ID", style="bold")
+    table.add_column("Description")
+    table.add_column("Glyphs", justify="right")
+    table.add_column("Size", justify="right", style="green")
+    table.add_column("File Saved", style="dim")
+
+    for chunk in res.chunks:
+        c_path = out_dir / chunk.filename
+        c_path.write_bytes(chunk.output_bytes)
+        table.add_row(chunk.chunk_id, chunk.label, str(chunk.glyph_count), f"{chunk.size_kb:.1f} KB", str(c_path))
+
+    console.print(table)
+    css_file = out_dir / f"{res.family_name.lower().replace(' ', '_')}-chunks.css"
+    css_file.write_text(res.combined_css, encoding="utf-8")
+    console.print(f"\n[bold green]✓ Generated CSS rules:[/bold green] {css_file}\n")
+
+
+def cmd_multiplatform(args: argparse.Namespace) -> None:
+    """Generate multi-platform Zero-CLS fallback stack."""
+    font_path = Path(args.font)
+    if not font_path.exists():
+        console.print(f"[bold red]Error:[/bold red] Font file not found: {font_path}")
+        sys.exit(1)
+
+    print_banner()
+    multi = calculate_multiplatform_overrides(str(font_path), preferred_strategy=args.strategy)
+
+    table = Table(title=f"Multi-Platform Fallback Stack for {multi.web_font_family}", border_style="green")
+    table.add_column("Platform", style="bold")
+    table.add_column("Fallback Font", style="cyan")
+    table.add_column("size-adjust", justify="right")
+    table.add_column("ascent-override", justify="right")
+    table.add_column("descent-override", justify="right")
+    table.add_column("line-gap-override", justify="right")
+
+    for plat, ov in [("Apple (macOS/iOS)", multi.macos), ("Windows", multi.windows), ("Android", multi.android)]:
+        table.add_row(
+            plat,
+            ov.fallback_font_name,
+            f"{ov.size_adjust:.2f}%",
+            f"{ov.ascent_override:.2f}%",
+            f"{ov.descent_override:.2f}%",
+            f"{ov.line_gap_override:.2f}%",
+        )
+
+    console.print(table)
+    console.print("\n[bold yellow]Unified Multi-Platform CSS Snippet:[/bold yellow]")
+    console.print(Panel(multi.full_css_snippet, border_style="dim"))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="fontlens",
@@ -319,6 +419,29 @@ def build_parser() -> argparse.ArgumentParser:
     p_studio.add_argument("--host", default="127.0.0.1", help="Host interface to bind")
     p_studio.add_argument("--port", type=int, default=8000, help="Port to bind")
     p_studio.set_defaults(func=cmd_studio)
+
+    # fetch
+    p_fetch = subparsers.add_parser("fetch", help="Download font from Google Fonts")
+    p_fetch.add_argument("family", help="Font family name (e.g. Poppins, Inter, Playfair Display)")
+    p_fetch.add_argument("-w", "--weight", type=int, default=400, help="Weight (e.g. 400, 700)")
+    p_fetch.add_argument("--italic", action="store_true", help="Download italic variant")
+    p_fetch.add_argument("-o", "--output", help="Output file path")
+    p_fetch.add_argument("-s", "--scan", help="Scan codebase and subset immediately")
+    p_fetch.set_defaults(func=cmd_fetch)
+
+    # split
+    p_split = subparsers.add_parser("split", help="Split font into progressive unicode-range chunks")
+    p_split.add_argument("font", help="Path to font file")
+    p_split.add_argument("-o", "--output", help="Output directory for chunks")
+    p_split.add_argument("--keep-hinting", action="store_true", help="Preserve hinting bytecode")
+    p_split.set_defaults(func=cmd_split)
+
+    # multiplatform
+    p_multi = subparsers.add_parser("multiplatform", help="Generate multi-platform Zero-CLS fallback stack")
+    p_multi.add_argument("font", help="Path to font file")
+    p_multi.add_argument("--strategy", choices=["width", "xheight"], default="width", help="size-adjust matching strategy")
+    p_multi.add_argument("--css", action="store_true", help="Print CSS code directly")
+    p_multi.set_defaults(func=cmd_multiplatform)
 
     return parser
 

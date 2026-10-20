@@ -1,23 +1,44 @@
-import React, { useRef } from 'react';
-import { Type, Upload, Sparkles, FileText, Activity } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Type, Upload, Sparkles, FileText, Activity, Layers, Download, Search, Globe } from 'lucide-react';
 
 export default function Navbar({
   currentFont,
   onLoadSample,
   onFileUpload,
+  onFetchGoogleFont,
   activeTab,
   setActiveTab,
   isVariable,
 }) {
   const fileInputRef = useRef(null);
+  const [googleFontInput, setGoogleFontInput] = useState('');
+  const [isFetchingGFont, setIsFetchingGFont] = useState(false);
+  const [showGFontModal, setShowGFontModal] = useState(false);
 
   const tabs = [
     { id: 'zero-cls', label: 'Zero-CLS Studio', icon: Activity },
+    { id: 'waterfall', label: 'Typography Waterfall', icon: Type },
     { id: 'subset', label: 'WOFF2 Subsetter', icon: Sparkles },
+    { id: 'chunking', label: 'Font Chunking', icon: Layers },
     { id: 'harvest', label: 'Codebase Harvest', icon: FileText },
     ...(isVariable ? [{ id: 'variable', label: 'Variable Axes', icon: Type }] : []),
     { id: 'inspector', label: 'Font Inspector', icon: Type },
   ];
+
+  const handleGoogleFontSubmit = async (e) => {
+    e?.preventDefault();
+    if (!googleFontInput.trim()) return;
+    setIsFetchingGFont(true);
+    try {
+      await onFetchGoogleFont(googleFontInput.trim());
+      setShowGFontModal(false);
+      setGoogleFontInput('');
+    } catch (err) {
+      alert(`Google Fonts Error: ${err.message}`);
+    } finally {
+      setIsFetchingGFont(false);
+    }
+  };
 
   return (
     <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
@@ -34,6 +55,11 @@ export default function Navbar({
                 <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 font-mono font-medium">
                   v0.1.0
                 </span>
+                {currentFont && (
+                  <span className="hidden sm:inline-block text-xs px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 font-mono">
+                    {currentFont}
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-400 hidden sm:block">
                 Web Font Bloat Optimizer & Zero-CLS Synthesizer
@@ -41,15 +67,23 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Quick Font Loader / Upload */}
+          {/* Quick Font Loader / Upload / Google Fonts */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden md:flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-lg p-1 text-xs text-slate-300">
-              <span className="text-slate-500 px-2 font-medium">Samples:</span>
+            <button
+              onClick={() => setShowGFontModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-500 text-slate-200 text-xs font-medium transition-all"
+            >
+              <Globe className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Google Fonts</span>
+            </button>
+
+            <div className="hidden lg:flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-lg p-1 text-xs text-slate-300">
+              <span className="text-slate-500 px-2 font-medium">Quick:</span>
               <button
                 onClick={() => onLoadSample('inter')}
                 className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors font-medium"
               >
-                Inter (Variable)
+                Inter
               </button>
               <button
                 onClick={() => onLoadSample('roboto')}
@@ -74,7 +108,7 @@ export default function Navbar({
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-md shadow-cyan-600/20 transition-colors"
             >
               <Upload className="w-3.5 h-3.5" />
-              <span>Upload Font</span>
+              <span>Upload File</span>
             </button>
 
             <a
@@ -113,6 +147,75 @@ export default function Navbar({
           })}
         </div>
       </div>
+
+      {/* Google Fonts Import Modal */}
+      {showGFontModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Globe className="w-4 h-4 text-cyan-400" />
+                Import from Google Fonts
+              </h3>
+              <button
+                onClick={() => setShowGFontModal(false)}
+                className="text-slate-400 hover:text-white text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleGoogleFontSubmit} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">
+                  Font Family Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Poppins, Plus Jakarta Sans, Outfit, Playfair Display"
+                  value={googleFontInput}
+                  onChange={(e) => setGoogleFontInput(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              {/* Popular quick picks */}
+              <div>
+                <span className="text-[11px] text-slate-500 font-medium block mb-1.5">Trending Web Fonts:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {['Poppins', 'Montserrat', 'Playfair Display', 'Plus Jakarta Sans', 'Outfit', 'Space Grotesk', 'Fira Code'].map((name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => setGoogleFontInput(name)}
+                      className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 transition-colors"
+                    >
+                      {name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowGFontModal(false)}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isFetchingGFont || !googleFontInput.trim()}
+                  className="px-4 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-md shadow-cyan-600/20 disabled:opacity-50"
+                >
+                  {isFetchingGFont ? 'Fetching...' : 'Fetch & Load Font'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

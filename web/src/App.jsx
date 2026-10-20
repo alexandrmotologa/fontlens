@@ -5,6 +5,8 @@ import SubsetStudio from './components/SubsetStudio';
 import CodebaseHarvest from './components/CodebaseHarvest';
 import VariableAxesStudio from './components/VariableAxesStudio';
 import FontInspector from './components/FontInspector';
+import ChunkSplitterStudio from './components/ChunkSplitterStudio';
+import TypographyWaterfall from './components/TypographyWaterfall';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('zero-cls');
@@ -34,15 +36,13 @@ export default function App() {
       const fileName = sampleName === 'roboto' ? 'Roboto-Regular.ttf' : 'Inter-Variable.ttf';
       const res = await fetch(`/samples/${fileName}`);
       if (!res.ok) {
-        // Fallback: create mock blob from API if sample route not direct
         throw new Error('Direct sample fetch failed');
       }
       const blob = await res.blob();
       const file = new File([blob], fileName, { type: 'font/ttf' });
       await processFontFile(file);
     } catch (err) {
-      // In case /samples is not mounted statically in dev, fetch via API or test fallback
-      console.log('Sample direct load fallback');
+      console.log('Sample direct load fallback', err);
     } finally {
       setIsLoading(false);
     }
@@ -82,12 +82,48 @@ export default function App() {
     }
   };
 
+  const handleFetchGoogleFont = async (family) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/fetch-google-font', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ family, weight: 400 }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || 'Failed to download Google Font');
+      }
+
+      const data = await res.json();
+      setFontDataUri(data.data_uri);
+      setMetadata(data.metadata);
+
+      // Convert data URI back to File object for subsequent subsetting
+      const byteString = atob(data.data_uri.split(',')[1]);
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ab], { type: 'font/woff2' });
+      const file = new File([blob], data.filename, { type: 'font/woff2' });
+      setFontFile(file);
+    } catch (err) {
+      alert(`Google Fonts Fetch Error: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSendToSubsetter = (glyphs) => {
     setHarvestedGlyphs(glyphs);
     setActiveTab('subset');
   };
 
   const isVariable = Boolean(metadata?.is_variable);
+  const familyName = metadata?.family || 'CustomWebFont';
 
   return (
     <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans">
@@ -95,6 +131,7 @@ export default function App() {
         currentFont={metadata?.family}
         onLoadSample={loadSampleFont}
         onFileUpload={processFontFile}
+        onFetchGoogleFont={handleFetchGoogleFont}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         isVariable={isVariable}
@@ -113,7 +150,15 @@ export default function App() {
             webMetrics={metadata?.metrics}
             systemFonts={systemFonts}
             fontDataUri={fontDataUri}
-            fontFamilyName={metadata?.family}
+            fontFamilyName={familyName}
+            fontFile={fontFile}
+          />
+        )}
+
+        {activeTab === 'waterfall' && (
+          <TypographyWaterfall
+            fontFamilyName={familyName}
+            fallbackAlias={`${familyName}-Fallback`}
           />
         )}
 
@@ -125,6 +170,13 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'chunking' && (
+          <ChunkSplitterStudio
+            fontFile={fontFile}
+            metadata={metadata}
+          />
+        )}
+
         {activeTab === 'harvest' && (
           <CodebaseHarvest onSendToSubsetter={handleSendToSubsetter} />
         )}
@@ -132,7 +184,7 @@ export default function App() {
         {activeTab === 'variable' && isVariable && (
           <VariableAxesStudio
             metadata={metadata}
-            fontFamilyName={metadata?.family}
+            fontFamilyName={familyName}
           />
         )}
 

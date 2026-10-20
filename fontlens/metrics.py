@@ -96,6 +96,26 @@ class MetricOverrides:
         }
 
 
+@dataclass
+class MultiPlatformOverrides:
+    web_font_family: str
+    windows: MetricOverrides
+    macos: MetricOverrides
+    android: MetricOverrides
+    unified_font_stack: str
+    full_css_snippet: str
+
+    def to_dict(self) -> dict:
+        return {
+            "web_font_family": self.web_font_family,
+            "windows": self.windows.to_dict(),
+            "macos": self.macos.to_dict(),
+            "android": self.android.to_dict(),
+            "unified_font_stack": self.unified_font_stack,
+            "full_css_snippet": self.full_css_snippet,
+        }
+
+
 def extract_font_metrics(font_input: Union[str, bytes, TTFont]) -> FontMetrics:
     """Extract OpenType metrics from a file path, raw bytes, or TTFont instance."""
     if isinstance(font_input, TTFont):
@@ -315,4 +335,92 @@ def calculate_metric_overrides(
         css_rule=css_rule,
         full_css_snippet=full_css_snippet,
         estimated_cls_reduction=estimated_cls_reduction,
+    )
+
+
+def calculate_multiplatform_overrides(
+    web_font: Union[FontMetrics, str, bytes, TTFont],
+    preferred_strategy: str = "width",
+) -> MultiPlatformOverrides:
+    """Calculate synchronized @font-face overrides for Windows, Apple, and Android."""
+    if not isinstance(web_font, FontMetrics):
+        web_metrics = extract_font_metrics(web_font)
+    else:
+        web_metrics = web_font
+
+    registry = get_fallback_registry()
+    family = web_metrics.family_name
+    category = web_metrics.category
+
+    # Windows fallback (Segoe UI or Georgia or Consolas)
+    win_name = "Segoe UI" if category == "sans-serif" else ("Georgia" if category == "serif" else "Consolas")
+    win_fb = registry.get(win_name) or registry.get("Arial")
+    win_override = calculate_metric_overrides(web_metrics, fallback=win_fb, preferred_strategy=preferred_strategy)
+    win_override.fallback_family_alias = f"{family}-Fallback-Windows"
+    win_override.css_rule = (
+        f"@font-face {{\n"
+        f"  font-family: '{win_override.fallback_family_alias}';\n"
+        f"  src: local('{win_fb.name}');\n"
+        f"  ascent-override: {win_override.ascent_override:.2f}%;\n"
+        f"  descent-override: {win_override.descent_override:.2f}%;\n"
+        f"  line-gap-override: {win_override.line_gap_override:.2f}%;\n"
+        f"  size-adjust: {win_override.size_adjust:.2f}%;\n"
+        f"}}"
+    )
+
+    # Apple fallback (Helvetica or Times New Roman or Menlo)
+    apple_name = "Helvetica" if category == "sans-serif" else ("Times New Roman" if category == "serif" else "Menlo")
+    apple_fb = registry.get(apple_name) or registry.get("Arial")
+    apple_override = calculate_metric_overrides(web_metrics, fallback=apple_fb, preferred_strategy=preferred_strategy)
+    apple_override.fallback_family_alias = f"{family}-Fallback-Apple"
+    apple_src = "local('-apple-system'), local('BlinkMacSystemFont'), local('Helvetica Neue'), local('Helvetica')" if category == "sans-serif" else f"local('{apple_fb.name}')"
+    apple_override.css_rule = (
+        f"@font-face {{\n"
+        f"  font-family: '{apple_override.fallback_family_alias}';\n"
+        f"  src: {apple_src};\n"
+        f"  ascent-override: {apple_override.ascent_override:.2f}%;\n"
+        f"  descent-override: {apple_override.descent_override:.2f}%;\n"
+        f"  line-gap-override: {apple_override.line_gap_override:.2f}%;\n"
+        f"  size-adjust: {apple_override.size_adjust:.2f}%;\n"
+        f"}}"
+    )
+
+    # Android fallback (Roboto or Times New Roman or Courier New)
+    android_name = "Roboto" if category == "sans-serif" else ("Times New Roman" if category == "serif" else "Courier New")
+    android_fb = registry.get(android_name) or registry.get("Arial")
+    android_override = calculate_metric_overrides(web_metrics, fallback=android_fb, preferred_strategy=preferred_strategy)
+    android_override.fallback_family_alias = f"{family}-Fallback-Android"
+    android_override.css_rule = (
+        f"@font-face {{\n"
+        f"  font-family: '{android_override.fallback_family_alias}';\n"
+        f"  src: local('{android_fb.name}');\n"
+        f"  ascent-override: {android_override.ascent_override:.2f}%;\n"
+        f"  descent-override: {android_override.descent_override:.2f}%;\n"
+        f"  line-gap-override: {android_override.line_gap_override:.2f}%;\n"
+        f"  size-adjust: {android_override.size_adjust:.2f}%;\n"
+        f"}}"
+    )
+
+    unified_font_stack = f"'{family}', '{apple_override.fallback_family_alias}', '{win_override.fallback_family_alias}', '{android_override.fallback_family_alias}', {category}"
+
+    full_css = (
+        f"/* FontLens Multi-Platform Zero-CLS Fallback Suite for {family} */\n\n"
+        f"/* Apple (macOS & iOS) */\n{apple_override.css_rule}\n\n"
+        f"/* Windows */\n{win_override.css_rule}\n\n"
+        f"/* Android & Linux */\n{android_override.css_rule}\n\n"
+        f":root {{\n"
+        f"  --font-primary: {unified_font_stack};\n"
+        f"}}\n\n"
+        f"body {{\n"
+        f"  font-family: var(--font-primary);\n"
+        f"}}"
+    )
+
+    return MultiPlatformOverrides(
+        web_font_family=family,
+        windows=win_override,
+        macos=apple_override,
+        android=android_override,
+        unified_font_stack=unified_font_stack,
+        full_css_snippet=full_css,
     )

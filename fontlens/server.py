@@ -15,10 +15,23 @@ from pydantic import BaseModel
 
 from fontlens import __version__
 from fontlens.analyzer import FontAnalyzer
+from fontlens.exporter import (
+    export_critical_html,
+    export_nextjs_config,
+    export_tailwind_v3,
+    export_tailwind_v4,
+    generate_audit_report,
+)
 from fontlens.fallbacks import get_fallback_registry
+from fontlens.google_fonts import fetch_google_font, get_popular_google_fonts
 from fontlens.harvester import CodebaseHarvester
-from fontlens.metrics import calculate_metric_overrides, extract_font_metrics
+from fontlens.metrics import (
+    calculate_metric_overrides,
+    calculate_multiplatform_overrides,
+    extract_font_metrics,
+)
 from fontlens.subsetter import FontSubsetter, SubsetConfig
+from fontlens.splitter import split_font
 
 
 app = FastAPI(
@@ -197,6 +210,134 @@ async def api_glyph_svg(
         return svg_info
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"SVG generation failed: {str(e)}")
+
+
+@app.get("/api/popular-google-fonts")
+def api_popular_google_fonts() -> dict:
+    return {"fonts": get_popular_google_fonts()}
+
+
+class FetchGoogleFontRequest(BaseModel):
+    family: str
+    weight: int = 400
+    italic: bool = False
+
+
+@app.post("/api/fetch-google-font")
+def api_fetch_google_font(req: FetchGoogleFontRequest) -> dict:
+    try:
+        font_bytes, filename = fetch_google_font(
+            family_name=req.family,
+            weight=req.weight,
+            italic=req.italic,
+        )
+        analyzer = FontAnalyzer(font_bytes)
+        meta = analyzer.get_metadata()
+        glyphs = analyzer.list_glyphs(limit=250)
+
+        b64_data = base64.b64encode(font_bytes).decode("ascii")
+        data_uri = f"data:font/woff2;base64,{b64_data}"
+
+        return {
+            "metadata": meta.to_dict(),
+            "glyphs": [g.to_dict() for g in glyphs],
+            "file_size_bytes": len(font_bytes),
+            "file_size_kb": round(len(font_bytes) / 1024, 2),
+            "data_uri": data_uri,
+            "filename": filename,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch Google Font: {str(e)}")
+
+
+@app.post("/api/split-font")
+async def api_split_font(
+    font: UploadFile = File(...),
+    strip_hinting: bool = Form(True),
+) -> dict:
+    font_bytes = await font.read()
+    if not font_bytes:
+        raise HTTPException(status_code=400, detail="Empty font file uploaded")
+
+    try:
+        split_res = split_font(font_bytes, strip_hinting=strip_hinting)
+        return split_res.to_dict()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Font splitting failed: {str(e)}")
+
+
+@app.post("/api/multiplatform-metrics")
+async def api_multiplatform_metrics(
+    font: UploadFile = File(...),
+    strategy: str = Form("width"),
+) -> dict:
+    font_bytes = await font.read()
+    if not font_bytes:
+        raise HTTPException(status_code=400, detail="Empty font file uploaded")
+
+    try:
+        multi = calculate_multiplatform_overrides(font_bytes, preferred_strategy=strategy)
+        return multi.to_dict()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Multiplatform calculation failed: {str(e)}")
+
+
+class ExportFrameworkRequest(BaseModel):
+    fallback_font_name: str = "Arial"
+    strategy: str = "width"
+
+
+@app.post("/api/export-framework")
+async def api_export_framework(
+    font: UploadFile = File(...),
+    fallback: str = Form("Arial"),
+    strategy: str = Form("width"),
+) -> dict:
+    font_bytes = await font.read()
+    try:
+        web_metrics = extract_font_metrics(font_bytes)
+        overrides = calculate_metric_overrides(web_metrics, fallback=fallback, preferred_strategy=strategy)
+
+        nextjs_code = export_nextjs_config(overrides)
+        tailwind_v4_code = export_tailwind_v4(overrides)
+        tailwind_v3_code = export_tailwind_v3(overrides)
+        critical_html_code = export_critical_html(overrides)
+
+        return {
+            "web_font_family": web_metrics.family_name,
+            "nextjs": nextjs_code,
+            "tailwind_v4": tailwind_v4_code,
+            "tailwind_v3": tailwind_v3_code,
+            "critical_html": critical_html_code,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Export failed: {str(e)}")
+
+
+@app.post("/api/audit-report")
+async def api_audit_report(
+    font: UploadFile = File(...),
+    fallback: str = Form("Arial"),
+    strategy: str = Form("width"),
+) -> dict:
+    font_bytes = await font.read()
+    try:
+        analyzer = FontAnalyzer(font_bytes)
+        meta = analyzer.get_metadata()
+        overrides = calculate_metric_overrides(meta.metrics, fallback=fallback, preferred_strategy=strategy)
+
+        # Quick simulated subset with ASCII
+        subsetter = FontSubsetter(font_bytes)
+        sub_res = subsetter.subset(SubsetConfig(text="".join(chr(i) for i in range(32, 127))))
+
+        report = generate_audit_report(
+            metadata={**meta.to_dict(), "file_size_kb": round(len(font_bytes) / 1024, 2)},
+            subset_data=sub_res.to_dict(),
+            overrides=overrides,
+        )
+        return report
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Audit generation failed: {str(e)}")
 
 
 # Serve sample fonts

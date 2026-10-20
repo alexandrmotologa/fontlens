@@ -7,7 +7,13 @@ __license__ = "MIT"
 from fontlens.analyzer import FontAnalyzer, FontMetadata
 from fontlens.fallbacks import FallbackFont, FallbackRegistry, get_fallback_registry
 from fontlens.harvester import CodebaseHarvester, HarvestResult
-from fontlens.metrics import FontMetrics, MetricOverrides, calculate_metric_overrides
+from fontlens.metrics import (
+    FontMetrics,
+    MetricOverrides,
+    MultiPlatformOverrides,
+    calculate_metric_overrides,
+    calculate_multiplatform_overrides,
+)
 from fontlens.subsetter import FontSubsetter, SubsetConfig, SubsetResult
 
 __all__ = [
@@ -20,8 +26,10 @@ __all__ = [
     "FontSubsetter",
     "HarvestResult",
     "MetricOverrides",
+    "MultiPlatformOverrides",
     "SubsetConfig",
     "SubsetResult",
     "calculate_metric_overrides",
+    "calculate_multiplatform_overrides",
     "get_fallback_registry",
 ]
