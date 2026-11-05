@@ -11,7 +11,7 @@ export default function ZeroCLSStudio({
   const [selectedFallback, setSelectedFallback] = useState('Arial');
   const [strategy, setStrategy] = useState('width');
   const [useOverrides, setUseOverrides] = useState(true);
-  const [viewMode, setViewMode] = useState('overlay'); // 'overlay', 'side-by-side', 'split'
+  const [viewMode, setViewMode] = useState('split'); // 'split', 'side-by-side', 'overlay'
   const [splitPos, setSplitPos] = useState(50);
   const [copied, setCopied] = useState(false);
   const [isSimulatingSwap, setIsSimulatingSwap] = useState(false);
@@ -24,7 +24,7 @@ export default function ZeroCLSStudio({
     ascent: 1854,
     descent: -434,
     line_gap: 307,
-    avg_char_width: 904,
+    avg_char_width: 1195,
     x_height: 1062,
     category: 'sans-serif',
   };
@@ -33,8 +33,8 @@ export default function ZeroCLSStudio({
   const webUpm = webMetrics?.units_per_em || 2048;
   const fbUpm = fallbackData.units_per_em || 2048;
 
-  const webWidthRatio = (webMetrics?.avg_char_width || 1000) / webUpm;
-  const fbWidthRatio = (fallbackData.avg_char_width || 900) / fbUpm;
+  const webWidthRatio = (webMetrics?.avg_char_width || 1247) / webUpm;
+  const fbWidthRatio = (fallbackData.avg_char_width || 1195) / fbUpm;
   const sWidth = fbWidthRatio > 0 ? webWidthRatio / fbWidthRatio : 1.0;
 
   const webXh = webMetrics?.x_height || Math.round(webUpm * 0.5);
@@ -43,8 +43,8 @@ export default function ZeroCLSStudio({
 
   const sFactor = strategy === 'width' ? sWidth : sXheight;
 
-  const ascentRatio = (webMetrics?.ascent || 1800) / webUpm;
-  const descentRatio = Math.abs(webMetrics?.descent || -400) / webUpm;
+  const ascentRatio = (webMetrics?.ascent || 1984) / webUpm;
+  const descentRatio = Math.abs(webMetrics?.descent || -494) / webUpm;
   const lineGapRatio = (webMetrics?.line_gap || 0) / webUpm;
 
   const ascentOverride = (ascentRatio / sFactor) * 100;
@@ -54,12 +54,12 @@ export default function ZeroCLSStudio({
 
   // Real mathematical shift delta computation based on true font coordinate metrics
   const sampleFontSize = 28;
-  const webLineBox = sampleFontSize * (((webMetrics?.ascent || 1854) - (webMetrics?.descent || -434) + (webMetrics?.line_gap || 0)) / webUpm);
+  const webLineBox = sampleFontSize * (((webMetrics?.ascent || 1984) - (webMetrics?.descent || -494) + (webMetrics?.line_gap || 0)) / webUpm);
   const fbLineBox = sampleFontSize * (((fallbackData.ascent || 1854) - (fallbackData.descent || -434) + (fallbackData.line_gap || 0)) / fbUpm);
   const dynamicDeltaY = Math.abs(webLineBox - fbLineBox);
 
-  const webCharW = sampleFontSize * ((webMetrics?.avg_char_width || 900) / webUpm);
-  const fbCharW = sampleFontSize * ((fallbackData.avg_char_width || 900) / fbUpm);
+  const webCharW = sampleFontSize * ((webMetrics?.avg_char_width || 1247) / webUpm);
+  const fbCharW = sampleFontSize * ((fallbackData.avg_char_width || 1195) / fbUpm);
   const dynamicDeltaX = Math.abs((webCharW - fbCharW) * 40); // 40 characters in preview line
   const dynamicRawCLS = Math.min(0.28, Math.max(0.045, (dynamicDeltaY / 750) * 8.5)).toFixed(3);
 
@@ -277,6 +277,17 @@ body { font-family: var(--font-primary); }
     styleEl.innerHTML = dynamicCss;
   }, [ascentOverride, descentOverride, lineGapOverride, sizeAdjust, fallbackAlias, fallbackData.name, family, fontDataUri]);
 
+  useEffect(() => {
+    window.__zeroCls = {
+      setViewMode,
+      setSplitPos,
+      setUseOverrides,
+      setCodeTab,
+      runSimulatedSwap,
+      setSelectedFallback,
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Top Banner & Metric Overrides Cards */}
@@ -484,7 +495,7 @@ body { font-family: var(--font-primary); }
           <div className="relative min-h-[180px] sm:min-h-[220px] p-4 sm:p-6 rounded-xl bg-slate-950 border border-slate-800 flex flex-col justify-center">
             {/* Fallback Font Layer */}
             <div
-              className="text-amber-400/70 select-none pointer-events-none break-words"
+              className="text-amber-400/40 select-none pointer-events-none break-words"
               style={{
                 fontFamily: isSimulatingSwap
                   ? (simulatedFontFamily === 'fallback'
@@ -503,13 +514,13 @@ body { font-family: var(--font-primary); }
             {/* Web Font Layer (when not in simulation mode) */}
             {!isSimulatingSwap && (
               <div
-                className="text-cyan-300 absolute inset-0 p-4 sm:p-6 flex flex-col justify-center pointer-events-none break-words"
+                className="text-cyan-300 absolute inset-0 p-4 sm:p-6 flex flex-col justify-center pointer-events-none break-words font-medium"
                 style={{
                   fontFamily: `'${family}', sans-serif`,
                   fontSize: 'clamp(18px, 3.2vw, 28px)',
                   lineHeight: '1.4',
                   mixBlendMode: 'screen',
-                  opacity: 0.85,
+                  opacity: 0.95,
                   zIndex: 2,
                 }}
               >
@@ -521,9 +532,19 @@ body { font-family: var(--font-primary); }
 
         {viewMode === 'split' && (
           <div className="relative min-h-[180px] sm:min-h-[220px] rounded-xl bg-slate-950 border border-slate-800 overflow-hidden select-none">
+            {/* Badges */}
+            <div className="absolute top-3 left-4 z-20 flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+              Web Font: {family}
+            </div>
+            <div className="absolute top-3 right-4 z-20 flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-800/60 font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+              {useOverrides ? `Adjusted Fallback: ${fallbackData.name}` : `Unadjusted: ${fallbackData.name}`}
+            </div>
+
             {/* Left side: Web Font */}
             <div
-              className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-center text-cyan-300 bg-slate-950 break-words"
+              className="absolute inset-0 p-4 sm:p-6 pt-10 sm:pt-12 flex flex-col justify-center text-cyan-300 bg-slate-950 break-words font-medium"
               style={{
                 fontFamily: `'${family}', sans-serif`,
                 fontSize: 'clamp(18px, 3.2vw, 28px)',
@@ -536,7 +557,7 @@ body { font-family: var(--font-primary); }
 
             {/* Right side: Fallback Font */}
             <div
-              className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-center text-amber-400 bg-slate-900 break-words"
+              className="absolute inset-0 p-4 sm:p-6 pt-10 sm:pt-12 flex flex-col justify-center text-amber-400 bg-slate-900/90 break-words font-medium"
               style={{
                 fontFamily: useOverrides ? `'${fallbackAlias}'` : `'${fallbackData.name}'`,
                 fontSize: 'clamp(18px, 3.2vw, 28px)',
@@ -549,7 +570,7 @@ body { font-family: var(--font-primary); }
 
             {/* Divider bar */}
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg pointer-events-none"
+              className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg pointer-events-none z-30"
               style={{ left: `${splitPos}%` }}
             >
               <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white text-slate-900 text-[10px] font-bold flex items-center justify-center shadow-md">
@@ -563,7 +584,7 @@ body { font-family: var(--font-primary); }
               max="100"
               value={splitPos}
               onChange={(e) => setSplitPos(Number(e.target.value))}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-10"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-40"
             />
           </div>
         )}

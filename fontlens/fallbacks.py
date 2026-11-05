@@ -53,7 +53,7 @@ STANDARD_FALLBACKS: List[FallbackFont] = [
         line_gap=307,
         cap_height=1467,
         x_height=1062,
-        avg_char_width=904,
+        avg_char_width=1195,
         os_target="cross-platform",
     ),
     FallbackFont(
@@ -66,7 +66,7 @@ STANDARD_FALLBACKS: List[FallbackFont] = [
         line_gap=0,
         cap_height=1456,
         x_height=1060,
-        avg_char_width=912,
+        avg_char_width=1180,
         os_target="macos",
     ),
     FallbackFont(
@@ -79,7 +79,7 @@ STANDARD_FALLBACKS: List[FallbackFont] = [
         line_gap=269,
         cap_height=1434,
         x_height=1024,
-        avg_char_width=1103,
+        avg_char_width=1210,
         os_target="windows",
     ),
     FallbackFont(
@@ -92,7 +92,7 @@ STANDARD_FALLBACKS: List[FallbackFont] = [
         line_gap=0,
         cap_height=1456,
         x_height=1082,
-        avg_char_width=1158,
+        avg_char_width=1205,
         os_target="android",
     ),
     FallbackFont(
@@ -105,7 +105,7 @@ STANDARD_FALLBACKS: List[FallbackFont] = [
         line_gap=198,
         cap_height=1419,
         x_height=986,
-        avg_char_width=901,
+        avg_char_width=1160,
         os_target="cross-platform",
     ),
     FallbackFont(
@@ -118,7 +118,7 @@ STANDARD_FALLBACKS: List[FallbackFont] = [
         line_gap=307,
         cap_height=1356,
         x_height=916,
-        avg_char_width=821,
+        avg_char_width=1120,
         os_target="cross-platform",
     ),
     FallbackFont(
@@ -131,7 +131,7 @@ STANDARD_FALLBACKS: List[FallbackFont] = [
         line_gap=215,
         cap_height=1489,
         x_height=1117,
-        avg_char_width=1009,
+        avg_char_width=1320,
         os_target="cross-platform",
     ),
     FallbackFont(
@@ -259,7 +259,22 @@ class FallbackRegistry:
         fallback.line_gap = hhea.lineGap
         fallback.cap_height = getattr(os2, "sCapHeight", fallback.cap_height)
         fallback.x_height = getattr(os2, "sxHeight", fallback.x_height)
-        fallback.avg_char_width = getattr(os2, "xAvgCharWidth", fallback.avg_char_width)
+
+        # Compute consistent Latin average character advance width across standard glyphs
+        if "hmtx" in font and "cmap" in font:
+            cmap = font.getBestCmap() or {}
+            sample_chars = [ord(c) for c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "]
+            latin_widths = []
+            for char_code in sample_chars:
+                glyph_name = cmap.get(char_code)
+                if glyph_name and glyph_name in font["hmtx"].metrics:
+                    latin_widths.append(font["hmtx"].metrics[glyph_name][0])
+            if latin_widths:
+                fallback.avg_char_width = int(sum(latin_widths) / len(latin_widths))
+            else:
+                fallback.avg_char_width = getattr(os2, "xAvgCharWidth", fallback.avg_char_width)
+        else:
+            fallback.avg_char_width = getattr(os2, "xAvgCharWidth", fallback.avg_char_width)
 
     def get(self, name: str) -> Optional[FallbackFont]:
         key = name.strip().lower()

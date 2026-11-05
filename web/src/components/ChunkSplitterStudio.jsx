@@ -1,11 +1,71 @@
 import React, { useState } from 'react';
 import { Layers, Download, Copy, Check, Scissors, RefreshCw } from 'lucide-react';
 
+const DEFAULT_SAMPLE_CHUNKS = {
+  family_name: 'Inter',
+  chunks: [
+    {
+      chunk_id: 'latin',
+      label: 'Core Latin Alphabet (ASCII & Standard Punctuation)',
+      glyph_count: 302,
+      size_kb: 56.2,
+      css_unicode_range: 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+2000-206F, U+20AC',
+    },
+    {
+      chunk_id: 'latin-ext',
+      label: 'Extended Latin (Diacritics, Eastern European & Accents)',
+      glyph_count: 711,
+      size_kb: 74.9,
+      css_unicode_range: 'U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20CF, U+2C60-2C7F, U+A720-A7FF',
+    },
+    {
+      chunk_id: 'symbols',
+      label: 'Mathematical Symbols, Currency & Arrows',
+      glyph_count: 124,
+      size_kb: 26.4,
+      css_unicode_range: 'U+2000-206F, U+2070-209F, U+2190-21FF, U+2200-22FF, U+2300-23FF',
+    },
+  ],
+  combined_css: `/* FontLens Progressive Unicode-Range Chunks for Inter */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/inter-chunk-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+20AC;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/inter-chunk-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20CF;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/inter-chunk-symbols.woff2') format('woff2');
+  unicode-range: U+2000-206F, U+2070-209F, U+2190-21FF, U+2200-22FF;
+}`,
+};
+
 export default function ChunkSplitterStudio({ fontFile, metadata }) {
   const [isSplitting, setIsSplitting] = useState(false);
-  const [splitData, setSplitData] = useState(null);
+  const [splitData, setSplitData] = useState(DEFAULT_SAMPLE_CHUNKS);
   const [copied, setCopied] = useState(false);
   const [stripHinting, setStripHinting] = useState(true);
+
+  React.useEffect(() => {
+    window.__chunkSplitter = {
+      setSplitData,
+    };
+  }, []);
 
   const handleSplit = async () => {
     if (!fontFile) {

@@ -1,6 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { Download, Sparkles, Filter, Check, Copy, Scissors, RefreshCw } from 'lucide-react';
 
+const DEFAULT_SUBSET_RESULT = {
+  original_size_kb: '856.0',
+  subset_size_kb: '13.9',
+  compression_percent: '98.4',
+  retained_glyph_count: 81,
+  original_glyph_count: 2248,
+  filename: 'Inter-Subset.woff2',
+  brotli_savings_kb: '842.1',
+  data_uri: '',
+};
+
 export default function SubsetStudio({
   fontFile,
   metadata,
@@ -13,9 +24,16 @@ export default function SubsetStudio({
   const [flavor, setFlavor] = useState('woff2');
   const [stripHinting, setStripHinting] = useState(true);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState(DEFAULT_SUBSET_RESULT);
   const [copied, setCopied] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  React.useEffect(() => {
+    window.__subsetStudio = {
+      setResult,
+      applyPreset,
+    };
+  }, []);
 
   // Extract unique characters set
   const charArray = useMemo(() => {

@@ -176,22 +176,22 @@ def extract_font_metrics(font_input: Union[str, bytes, TTFont]) -> FontMetrics:
     cap_height = getattr(os2, "sCapHeight", 0) if os2 else 0
     x_height = getattr(os2, "sxHeight", 0) if os2 else 0
 
-    # Calculate average char width across Latin glyphs or fallback to OS/2 xAvgCharWidth
-    avg_char_width = getattr(os2, "xAvgCharWidth", 0) if os2 else 0
+    # Calculate average character advance width across standard Latin glyphs from hmtx
+    avg_char_width = 0
+    if "hmtx" in font and "cmap" in font:
+        cmap = font.getBestCmap() or {}
+        sample_chars = [ord(c) for c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "]
+        latin_widths = []
+        for char_code in sample_chars:
+            glyph_name = cmap.get(char_code)
+            if glyph_name and glyph_name in font["hmtx"].metrics:
+                latin_widths.append(font["hmtx"].metrics[glyph_name][0])
+        if latin_widths:
+            avg_char_width = int(sum(latin_widths) / len(latin_widths))
+
     if avg_char_width == 0:
-        # Compute dynamically from hmtx table
-        if "hmtx" in font and "cmap" in font:
-            cmap = font.getBestCmap() or {}
-            latin_widths = []
-            for char_code in range(ord("a"), ord("z") + 1):
-                glyph_name = cmap.get(char_code)
-                if glyph_name and glyph_name in font["hmtx"].metrics:
-                    latin_widths.append(font["hmtx"].metrics[glyph_name][0])
-            if latin_widths:
-                avg_char_width = int(sum(latin_widths) / len(latin_widths))
-            else:
-                avg_char_width = int(upm * 0.5)
-        else:
+        avg_char_width = getattr(os2, "xAvgCharWidth", 0) if os2 else 0
+        if avg_char_width == 0:
             avg_char_width = int(upm * 0.5)
 
     # Classify font category (serif vs sans-serif vs monospace)

@@ -30,6 +30,14 @@ export default function App() {
     loadSampleFont('inter');
   }, []);
 
+  useEffect(() => {
+    window.__fontlens = {
+      setActiveTab,
+      loadSampleFont,
+      setHarvestedGlyphs,
+    };
+  }, []);
+
   const loadSampleFont = async (sampleName) => {
     setIsLoading(true);
     try {
